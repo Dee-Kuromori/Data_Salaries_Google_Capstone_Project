@@ -1,0 +1,242 @@
+---
+title: "Data Professional jobs Project"
+author: "Demetric Thompson"
+date: "2023-07-05"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring:
+<p>- HTML<br>
+- PDF<br>
+- MS Word<br>
+</p>
+
+## Project Description
+This project takes information from a kaggle dataset csv that has information about different data professional jobs from 2020 to 2023. I explored this data with a focus on the salary, job category, and experience level dimensions. The job category was created by group similar job title based on the description of the roles when I googled it. The three job categories are data analyst, data engineer, and data scientist. All of my calculations and visualizations were using the tidyverse collection of packages.
+
+To access the source of this dataset click here [link](https://www.kaggle.com/datasets/arnabchaki/data-science-salaries-2023).
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Setting Up Environment
+Notes: setting up my R environment by loading the following packages: 
+<p>- tidyverse <br>
+- skimr<br>
+- janitor<br>
+- here
+</p>
+```{r install}
+#If you run this and packages not installed, uncomment install.packages and-
+#run it for all of them. After that comment the intall.packages again
+# install.packages("tidyverse")
+library(tidyverse)
+# 
+# install.packages("skimr")
+library(skimr)
+# 
+# install.packages("here")
+library(here)
+# 
+# install.packages("janitor")
+library(janitor)
+```
+
+## read csv file
+```{r csv}
+#load data into dataframe
+data_jobs <- read.csv("C:\\Users\\demet\\OneDrive - Georgia State University\\Documents\\R_programming\\Google_data_analytics_cert\\Capstone_project\\ds_salaries.csv")
+```
+
+## Preview Data
+```{r structure}
+#look at a preview of data frame and get its meta 
+str(data_jobs)
+
+```
+```{r skim}
+#look at a preview of data frame and get its meta data 
+head(data_jobs)
+#skim_without_charts(data_jobs)
+# glimpse(data_jobs)
+
+```
+
+## Clean Data
+
+```{r clean_column_names}
+#clean names of columns
+#clean_names(data_jobs)
+```
+
+```{r distinct_experience_level}
+select(data_jobs,experience_level) %>% 
+  distinct()
+```
+
+```{r distinct_company_size}
+select(data_jobs,company_size) %>% 
+  distinct()
+```
+
+
+
+
+```{r changing_and_standardizing_values}
+#change values in columns company size and experience level
+  df_jobs_clean <- mutate(data_jobs,
+                   experience_level = str_replace_all(experience_level,c('SE' = 'senior', 'EX' = 'executive', 'MI' = 'middle', 'EN' = "entry")), 
+                   company_size = str_replace_all(company_size, c('L' = 'large', 'S' = 'small','M' = 'middle')))
+
+head(df_jobs_clean)
+```
+
+```{r filter_for_us}
+#filter for data where the company is located in the U.S.
+df_jobs_clean_us <- filter(df_jobs_clean,company_location == "US")
+```
+
+
+```{r create_column_job_category}
+#create job categories based on job_title 
+
+df_jobs_organized_us <- df_jobs_clean_us %>% 
+  mutate(job_type = case_when(
+        #jobs in data engineering category
+       str_like(job_title,"%data engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%business intelligence engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%data quality analyst%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%ETL%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Architect%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Operations Engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data modeler%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Strateg%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Manage%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Head of Data%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Database Engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Infrastructure Engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Lead%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data DevOps Engineer%",ignore_case = TRUE) ~ "Data Engineer",
+       str_like(job_title,"%Data Specialist%",ignore_case = TRUE) ~ "Data Engineer",
+        #jobs in data science category
+       str_like(job_title,"%Data Scien%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Computer%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Machine Learn%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%AI%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Artificial%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Scien%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%ML%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Data Scien%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Data Scien%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Autonomous%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%NLP%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Research%",ignore_case = TRUE) ~ "Data Scientist",
+       str_like(job_title,"%Learn%",ignore_case = TRUE) ~ "Data Scientist",
+        #jobs in data analyst category
+      str_like(job_title,"%Data Analyst%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%Data Analyst%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%Data Analyst%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%Analytics%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%BI%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%Insight%",ignore_case = TRUE) ~ "Data Analyst",
+      str_like(job_title,"%Data Operations Analyst%",ignore_case = TRUE) ~ "Data Analyst"
+         
+  )) 
+
+#check to see if all rows are in one of the job categories
+distinct(df_jobs_organized_us,job_type)
+
+```
+## Explore and Visualize Data
+
+```{r avg_salary_per_job_type_and_year}
+df_group_salary_job_year <- df_jobs_organized_us %>% 
+  select(-job_title,-salary_currency) %>% 
+    group_by(job_type,work_year) %>% 
+    summarise(avg_salary = mean(salary_in_usd))%>%
+    arrange(work_year)
+
+#visualize it
+options(scipen = 999)
+ggplot(data = df_group_salary_job_year) +
+  geom_col(mapping = aes(x = job_type,y = avg_salary,fill = job_type))+
+  geom_text(aes(x = job_type,y = avg_salary,label = as.integer(avg_salary)), vjust = 0.9)+
+  labs(title = "Average Salary of data professional jobs by job category",caption = "Data collected from Kaggle dataset") +
+  facet_wrap(~work_year)
+```
+
+```{r avg_salary_by_experience-level_and_year}
+#find avg salary per year and experience level
+df_group_experience_salary_yearly <- df_jobs_organized_us %>% 
+  select(experience_level,work_year,job_type,salary_in_usd) %>% 
+  group_by(experience_level,work_year) %>% 
+  summarise(avg_salary = mean(salary_in_usd))%>%
+  arrange(work_year)
+  
+options(scipen = 999)
+ggplot(data = df_group_experience_salary_yearly) +
+  geom_col(mapping = aes(x = experience_level,y = avg_salary,fill = experience_level))+
+  geom_text(aes(x = experience_level,y = avg_salary,label = as.integer(avg_salary)), vjust = -0.2)+
+  labs(title = "Average Salary of data professional jobs by experience level",caption = "Data collected from Kaggle dataset") +
+  facet_wrap(~work_year)     
+  
+```
+
+```{r number_of_jobs_by_job_type_and_year}
+#find the number of jobs per job_type and year
+df_group_jobs_year_count <- group_by(select(df_jobs_organized_us,job_type,work_year),job_type,work_year) %>% 
+  summarise(number_of_jobs = n())%>%
+  arrange(work_year)
+
+#visualize it
+options(scipen = 999)
+ggplot(data = df_group_jobs_year_count) +
+  geom_col(mapping = aes(x = work_year,y = number_of_jobs,fill = work_year))+
+  geom_text(aes(x = work_year,y = number_of_jobs,label = number_of_jobs), vjust = -0.2)+
+  facet_wrap(~job_type)     
+```
+
+```{r number_of_jobs_via_experience-level_job-type_and_year}
+#find the number of jobs per experience level,job_type, and year
+df_group_experience_jobs_count <- df_jobs_organized_us %>% 
+  select(work_year,job_type,experience_level)%>%
+  group_by(job_type,experience_level,work_year) %>% 
+  summarise(number_of_jobs = n())%>%
+  arrange(work_year)
+
+#visualize it
+options(scipen = 999)
+ggplot(data = df_group_experience_jobs_count) +
+  geom_col(mapping = aes(x = experience_level,y = number_of_jobs,fill = job_type))+
+  labs(title = "Number of data professional jobs by experience level and job category",caption = "Data collected from Kaggle dataset") +
+  facet_wrap(~work_year)
+
+```
+
+```{r number_of_jobs_per_experience-level_and_year}
+#find the number of jobs per experience level and year
+df_group_experience_year_count <- df_jobs_organized_us %>% 
+  select(work_year,experience_level)%>%
+  group_by(experience_level,work_year) %>% 
+  summarise(number_of_jobs = n())%>%
+  arrange(work_year)
+
+#visualize it
+options(scipen = 999)
+ggplot(data = df_group_experience_year_count) +
+  geom_col(mapping = aes(x = experience_level,y = number_of_jobs,fill = experience_level))+
+  geom_text(aes(x = experience_level,y = number_of_jobs,label = number_of_jobs), vjust = 0.3)+
+  labs(title = "Number of Data professional jobs by experience level",caption = "Data collected from Kaggle dataset") +
+  facet_wrap(~work_year)
+```
+
+
+Note that the `echo = FALSE` parameter can be added to the code chunk to prevent printing of the R code that generated the visual.
